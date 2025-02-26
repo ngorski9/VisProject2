@@ -1,0 +1,27 @@
+.triangle{
+    background-image:url("./tri.png");
+    background-color: transparent;    
+    background-size: 100%;
+    mix-blend-mode: multiply;
+    width: 204px;
+    height: 180px;
+    margin: 20px;
+    position: relative;
+    margin-bottom: 40px;
+}
+
+.slider{
+    width: 20px;
+    height: 20px;
+    background-color: grey;
+    border-radius: 50%;
+    position: absolute;
+    top: 90px;
+    left: 90px;
+}
+
+.select1, .select2, .select3{
+    position: absolute;
+    margin: 0;
+    padding: 0;
+}
