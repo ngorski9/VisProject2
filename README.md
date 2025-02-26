@@ -1,6 +1,6 @@
 # VisProject2
 
-Hi :)
+The original dataset can be downloaded from https://github.com/ngorski9/VisProject2/releases/tag/v0.1.
 
 ## Set up environment
 1. Install `nvm` 
