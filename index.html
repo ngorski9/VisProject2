@@ -15,21 +15,67 @@
       background: rgba(255, 255, 255, 0.8);
       padding: 10px;
       border-radius: 5px;
+      padding-left: 50px;
+      padding-right: 50px;
     }
   </style>
 </head>
 <body>
   <!-- Controls for adjusting the cube's dimensions -->
   <div id="controls">
-    <label for="sliderX">Scale X: </label>
+    <!-- <label for="sliderX">Scale X: </label>
     <input type="range" id="sliderX" min="0.1" max="3" step="0.1" value="1"><br>
     <label for="sliderY">Scale Y: </label>
     <input type="range" id="sliderY" min="0.1" max="3" step="0.1" value="1"><br>
     <label for="sliderZ">Scale Z: </label>
     <input type="range" id="sliderZ" min="0.1" max="3" step="0.1" value="1"><br>
+   -->
+   <label>X Axis</label>
+   <div class="triangle" id="triangle0">
+    <div class="slider"></div>
+    <select class="select1">
+        <option>Melting Temp.</option>
+    </select>
+    <select class="select2">
+        <option>Melting Temp.</option>
+    </select>
+    <select class="select3">
+        <option>Melting Temp.</option>
+    </select>
+    </div>   
+
+    <label>Y Axis</label>
+    <div class="triangle" id="triangle1">
+     <div class="slider"></div>
+     <select class="select1">
+         <option>Melting Temp.</option>
+     </select>
+     <select class="select2">
+         <option>Melting Temp.</option>
+     </select>
+     <select class="select3">
+         <option>Melting Temp.</option>
+     </select>
+     </div>   
+
+     <label>Z Axis</label>
+    <div class="triangle" id="triangle2">
+      <div class="slider"></div>
+      <select class="select1">
+          <option>Melting Temp.</option>
+      </select>
+      <select class="select2">
+          <option>Melting Temp.</option>
+      </select>
+      <select class="select3">
+          <option>Melting Temp.</option>
+      </select>
+      </div>   
   </div>
 
   <!-- Load your custom JavaScript file as an ES module -->
   <script type="module" src="./main.js"></script>
+  <link rel="stylesheet" href="./style-gui.css"></link>
+  <script src="./slider-script.js"></script>
 </body>
 </html>

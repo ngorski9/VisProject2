@@ -29,9 +29,9 @@ function init() {
   scene.add(cube);
 
   // Attach event listeners to the slider controls
-  document.getElementById('sliderX').addEventListener('input', updateCubeScale);
-  document.getElementById('sliderY').addEventListener('input', updateCubeScale);
-  document.getElementById('sliderZ').addEventListener('input', updateCubeScale);
+  // document.getElementById('sliderX').addEventListener('input', updateCubeScale);
+  // document.getElementById('sliderY').addEventListener('input', updateCubeScale);
+  // document.getElementById('sliderZ').addEventListener('input', updateCubeScale);
 
   // Start the animation loop
   animate();
