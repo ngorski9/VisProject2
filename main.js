@@ -8,16 +8,11 @@ let pointsObject=null;
 let boxEdges=null;
 let controls=null;
 let pivot = null;         // Pivot group for the bounding box.
-
+let rows = null
+let selectedRows = [];
 
 // Shared variables for the orientation indicator.
 let axisScene, axisCamera, axisGroup;
-
-const coeff1 = [1, 0, 0]; // Coefficients for the first CSV column.
-const coeff2 = [0, 1, 0]; // Coefficients for the second CSV column.
-const coeff3 = [0, 0, 1]; // Coefficients for the third CSV column.
-
-
 
 // Initialize the scene, camera, renderer, and cube
 function init() {
@@ -45,7 +40,7 @@ function init() {
   controls.enableDamping = true; // for smooth controls
 
 
-  loadCSV('initial_data.csv')
+  loadCSV('initial_data_normalized.csv')
     .then(rows => {
       createPoints(rows);
       if (pointsObject) {
@@ -70,6 +65,29 @@ function init() {
   animate();
 }
 
+function project_row(row){
+  if( animationCounter == 0 ){
+    const x = row[selectors[0][0]] * coeffs[0][0] + row[selectors[0][1]] * coeffs[0][1] + row[selectors[0][2]] * coeffs[0][2]
+    const y = row[selectors[1][0]] * coeffs[1][0] + row[selectors[1][1]] * coeffs[1][1] + row[selectors[1][2]] * coeffs[1][2]
+    const z = row[selectors[2][0]] * coeffs[2][0] + row[selectors[2][1]] * coeffs[2][1] + row[selectors[2][2]] * coeffs[2][2]
+    return [x,y,z]
+  } else {
+    const x1 = row[selectors[0][0]] * coeffs[0][0] + row[selectors[0][1]] * coeffs[0][1] + row[selectors[0][2]] * coeffs[0][2]
+    const y1 = row[selectors[1][0]] * coeffs[1][0] + row[selectors[1][1]] * coeffs[1][1] + row[selectors[1][2]] * coeffs[1][2]
+    const z1 = row[selectors[2][0]] * coeffs[2][0] + row[selectors[2][1]] * coeffs[2][1] + row[selectors[2][2]] * coeffs[2][2]
+
+    const x2 = row[selectors_old[0][0]] * coeffs[0][0] + row[selectors_old[0][1]] * coeffs[0][1] + row[selectors_old[0][2]] * coeffs[0][2]
+    const y2 = row[selectors_old[1][0]] * coeffs[1][0] + row[selectors_old[1][1]] * coeffs[1][1] + row[selectors_old[1][2]] * coeffs[1][2]
+    const z2 = row[selectors_old[2][0]] * coeffs[2][0] + row[selectors_old[2][1]] * coeffs[2][1] + row[selectors_old[2][2]] * coeffs[2][2]
+
+    const x = (animationCounter / animation_length) * x2 + (1.0 - animationCounter / animation_length) * x1
+    const y = (animationCounter / animation_length) * y2 + (1.0 - animationCounter / animation_length) * y1
+    const z = (animationCounter / animation_length) * z2 + (1.0 - animationCounter / animation_length) * z1
+    return [x,y,z]
+  }
+
+}
+
 // // Function to update the cube's scale using slider values
 // function updateCubeScale() {
 //   const scaleX = document.getElementById('sliderX').value;
@@ -88,9 +106,9 @@ function loadCSV(url) {
       // Remove the header.
       lines.shift();
       // Parse each line into an array of numbers.
-      const rows = lines.map(line => line.split(',').map(Number));
+      rows = lines.map(line => line.split(',').map(Number));
       // Randomly choose 100 points.
-      const selectedRows = [];
+      selectedRows = [];
       while (selectedRows.length < 100 && rows.length > 0) {
         const index = Math.floor(Math.random() * rows.length);
         selectedRows.push(rows.splice(index, 1)[0]);
@@ -103,16 +121,8 @@ function loadCSV(url) {
 function createPoints(rows) {
   const positions = [];
   rows.forEach(row => {
-    // Assume each row has at least three columns: v1, v2, v3.
-    const v1 = row[0], v2 = row[1], v3 = row[2];
-    // Compute the 3D coordinate via the linear combination:
-    // x = v1 * coeff1[0] + v2 * coeff2[0] + v3 * coeff3[0]
-    // y = v1 * coeff1[1] + v2 * coeff2[1] + v3 * coeff3[1]
-    // z = v1 * coeff1[2] + v2 * coeff2[2] + v3 * coeff3[2]
-    const x = v1 * coeff1[0] + v2 * coeff2[0] + v3 * coeff3[0];
-    const y = v1 * coeff1[1] + v2 * coeff2[1] + v3 * coeff3[1];
-    const z = v1 * coeff1[2] + v2 * coeff2[2] + v3 * coeff3[2];
-    positions.push(x, y, z);
+    let projection = project_row(row)
+    positions.push(projection[0], projection[1], projection[2]);
   });
 
   // Create a BufferGeometry and add the computed positions as an attribute.
@@ -120,20 +130,16 @@ function createPoints(rows) {
   pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 
   // Create a PointsMaterial for the points.
-  const pointsMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 1.0 });
+  const pointsMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.01 });
 
   // Create the Points object and add it to the scene.
   pointsObject = new THREE.Points(pointsGeometry, pointsMaterial);
   scene.add(pointsObject);
 }
 
-
 // Create a bounding box (drawn as edges) that exactly encloses the data points.
 function createBoundingBoxFromPoints() {
-  // Compute the bounding box from the points' geometry.
-  const geometry = pointsObject.geometry;
-  geometry.computeBoundingBox();
-  const box = geometry.boundingBox; // THREE.Box3 object.
+  const box = new THREE.Box3(new THREE.Vector3(0,0,0), new THREE.Vector3(1,1,1))
 
   // Compute the center and size of the bounding box.
   const boxCenter = new THREE.Vector3();
@@ -290,6 +296,30 @@ function createTextSprite(message, parameters) {
 function animate() {
   requestAnimationFrame(animate);
 
+  if( animationCounter > 0 ){
+    animationCounter -= 1;
+    if(animationCounter == 0){
+      for(let i = 0; i < 3; i++){
+        for(let j = 0; j < 3; j++){
+            selectors_old[i][j] = selectors[i][j]
+        }
+    }
+    }
+  }
+
+  if( pointsObject ){
+    let g = pointsObject.geometry
+    let p = g.getAttribute("position")
+    for(let i = 0; i < p.count; ++i){
+      let row = selectedRows[i]
+
+      let projection = project_row(row)
+
+      // update the positions
+      p.setXYZ(i,projection[0],projection[1],projection[2])
+      p.needsUpdate = true
+    }
+  }
 
   // Synchronize the orientation indicator's rotation with the main scene's pivot.
   controls.update();  // Update mouse controls.

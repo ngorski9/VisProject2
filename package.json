@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ngorski9/VisProject2#readme",
   "dependencies": {
+    "22": "^0.0.0",
     "three": "^0.173.0"
   }
 }
