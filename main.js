@@ -9,10 +9,72 @@ let boxEdges=null;
 let controls=null;
 let pivot = null;         // Pivot group for the bounding box.
 let rows = null
-let selectedRows = [];
+
+
+let selectedNormalizedRows = [];
+let selectedOriginalRows = []; //Selected rows for tooltip display.
 
 // Shared variables for the orientation indicator.
 let axisScene, axisCamera, axisGroup;
+
+let csvHeader = [];
+let normalizedData = [];       // All rows from initial_data_normalized.csv.
+let originalCSVData = [];      // All rows from initial_data.csv.
+
+
+
+
+
+let mouse = new THREE.Vector2();
+let raycaster = new THREE.Raycaster();
+raycaster.params.Points.threshold = 0.01;
+
+let ambientLight, directionalLight;
+
+
+// Create a tooltip element.
+const tooltip = document.createElement('div');
+tooltip.style.position = "absolute";
+tooltip.style.backgroundColor = "rgba(255,255,255,0.8)";
+tooltip.style.padding = "4px 8px";
+tooltip.style.border = "1px solid #000";
+tooltip.style.borderRadius = "4px";
+tooltip.style.pointerEvents = "none";
+tooltip.style.display = "none";
+document.body.appendChild(tooltip);
+
+function loadCSVWithHeader(url) {
+  return fetch(url)
+    .then(response => response.text())
+    .then(data => {
+      const lines = data.split('\n').filter(line => line.trim().length > 0);
+      const header = lines.shift().split(','); // extract header
+      const rows = lines.map(line => line.split(',').map(Number));
+      return { header, rows };
+    });
+}
+
+// // Load the CSV file from the specified URL and parse it.
+// function loadCSV(url) {
+//   return fetch(url)
+//     .then(response => response.text())
+//     .then(data => {
+//       // Split into lines and remove empty lines.
+//       const lines = data.split('\n').filter(line => line.trim().length > 0);
+//       // Remove the header.
+//       csvHeader = lines.shift().split(',');
+//       // Parse each line into an array of numbers.
+//       rows = lines.map(line => line.split(',').map(Number));
+//       // Randomly choose 100 points.
+//       selectedRows = [];
+//       while (selectedRows.length < 100 && rows.length > 0) {
+//         const index = Math.floor(Math.random() * rows.length);
+//         selectedRows.push(rows.splice(index, 1)[0]);
+//       }
+//       return selectedRows;
+//     });
+// }
+
 
 // Initialize the scene, camera, renderer, and cube
 function init() {
@@ -39,14 +101,32 @@ function init() {
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true; // for smooth controls
 
+  Promise.all([
+    loadCSVWithHeader('initial_data_normalized.csv'),
+    loadCSVWithHeader('initial_data.csv')
+  ])
+    .then(([normalizedResult, originalResult]) => {
+      // Use normalized data for point positions.
+      normalizedData = normalizedResult.rows;
+      // Use original CSV header and data for display.
+      csvHeader = originalResult.header;
+      originalCSVData = originalResult.rows;
 
-  loadCSV('initial_data_normalized.csv')
-    .then(rows => {
-      createPoints(rows);
+      // Randomly select 100 rows (assuming both files have the same order).
+      selectedNormalizedRows = [];
+      selectedOriginalRows = [];
+      // We'll work on copies so as not to disturb the original arrays.
+      let normCopy = normalizedData.slice();
+      let origCopy = originalCSVData.slice();
+      while (selectedNormalizedRows.length < 100 && normCopy.length > 0) {
+        const idx = Math.floor(Math.random() * normCopy.length);
+        selectedNormalizedRows.push(normCopy.splice(idx, 1)[0]);
+        selectedOriginalRows.push(origCopy.splice(idx, 1)[0]);
+      }
+
+      createPoints(selectedNormalizedRows);
       if (pointsObject) {
         createBoundingBoxFromPoints();
-        // createAxisLabels();
-        // Set OrbitControls target to the pivot (box center)
         if (pivot) {
           controls.target.copy(pivot.position);
           controls.update();
@@ -56,11 +136,50 @@ function init() {
       }
     })
     .catch(err => {
-      console.error('Error loading CSV data:', err);
+      console.error('Error loading CSV files:', err);
     });
 
 
+  // loadCSV('initial_data_normalized.csv')
+  //   .then(rows => {
+  //     createPoints(rows);
+  //     if (pointsObject) {
+  //       createBoundingBoxFromPoints();
+  //       // createAxisLabels();
+  //       // Set OrbitControls target to the pivot (box center)
+  //       if (pivot) {
+  //         controls.target.copy(pivot.position);
+  //         controls.update();
+  //       }
+  //     } else {
+  //       console.error("No points were created from CSV data.");
+  //     }
+  //   })
+  //   .catch(err => {
+  //     console.error('Error loading CSV data:', err);
+  //   });
+
+
   createOrientationIndicator();
+
+  // Add the mousemove event listener for hover.
+  document.addEventListener('mousemove', onMouseMove, false);
+
+
+  // Create lights in the scene:
+  ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+  scene.add(ambientLight);
+
+  directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  // Initially position the light at the camera's position:
+  directionalLight.position.copy(camera.position);
+  // Set its target to a point in front of the camera.
+  // (You must add the target to the scene.)
+  directionalLight.target.position.copy(camera.position.clone().add(camera.getWorldDirection(new THREE.Vector3())));
+  scene.add(directionalLight);
+  scene.add(directionalLight.target);
+
+
 
   animate();
 }
@@ -96,45 +215,60 @@ function project_row(row){
 //   cube.scale.set(scaleX, scaleY, scaleZ);
 // }
 
-// Load the CSV file from the specified URL and parse it.
-function loadCSV(url) {
-  return fetch(url)
-    .then(response => response.text())
-    .then(data => {
-      // Split into lines and remove empty lines.
-      const lines = data.split('\n').filter(line => line.trim().length > 0);
-      // Remove the header.
-      lines.shift();
-      // Parse each line into an array of numbers.
-      rows = lines.map(line => line.split(',').map(Number));
-      // Randomly choose 100 points.
-      selectedRows = [];
-      while (selectedRows.length < 100 && rows.length > 0) {
-        const index = Math.floor(Math.random() * rows.length);
-        selectedRows.push(rows.splice(index, 1)[0]);
-      }
-      return selectedRows;
-    });
-}
+
 
 // Create points based on the CSV data and your coefficient vectors.
 function createPoints(rows) {
-  const positions = [];
-  rows.forEach(row => {
-    let projection = project_row(row)
-    positions.push(projection[0], projection[1], projection[2]);
+
+  const count = rows.length;
+  // Create a sphere geometry for each point.
+  // Adjust the radius and segment counts as needed.
+  const sphereGeometry = new THREE.SphereGeometry(0.01, 8, 8);
+
+  // // You can use any material; here we use a basic red material.
+  const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+  // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const instancedMesh = new THREE.InstancedMesh(sphereGeometry, sphereMaterial, count);
+  
+  // Temporary object to set instance transforms.
+  const dummy = new THREE.Object3D();
+  
+  rows.forEach((row, i) => {
+    const projection = project_row(row);
+    dummy.position.set(projection[0], projection[1], projection[2]);
+    dummy.updateMatrix();
+    instancedMesh.setMatrixAt(i, dummy.matrix);
   });
 
-  // Create a BufferGeometry and add the computed positions as an attribute.
-  const pointsGeometry = new THREE.BufferGeometry();
-  pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 
-  // Create a PointsMaterial for the points.
-  const pointsMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.01 });
 
-  // Create the Points object and add it to the scene.
-  pointsObject = new THREE.Points(pointsGeometry, pointsMaterial);
+  instancedMesh.instanceMatrix.needsUpdate = true;
+  pointsObject = instancedMesh;
   scene.add(pointsObject);
+
+  // // Add lighting so spheres are visible
+  // const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+  // scene.add(ambientLight);
+  // const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+  // directionalLight.position.set(1, 1, 1).normalize();
+  // scene.add(directionalLight);
+
+  // const positions = [];
+  // rows.forEach(row => {
+  //   let projection = project_row(row)
+  //   positions.push(projection[0], projection[1], projection[2]);
+  // });
+
+  // // Create a BufferGeometry and add the computed positions as an attribute.
+  // const pointsGeometry = new THREE.BufferGeometry();
+  // pointsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+  // // Create a PointsMaterial for the points.
+  // const pointsMaterial = new THREE.PointsMaterial({ color: 0xff0000, size: 0.01 });
+
+  // // Create the Points object and add it to the scene.
+  // pointsObject = new THREE.Points(pointsGeometry, pointsMaterial);
+  // scene.add(pointsObject);
 }
 
 // Create a bounding box (drawn as edges) that exactly encloses the data points.
@@ -267,30 +401,60 @@ function createTextSprite(message, parameters) {
   return sprite;
 }
 
-// // Add axis labels near the positive faces of the bounding box.
-// function createAxisLabels() {
-//   // Recompute the bounding box from the points.
-//   const geometry = pointsObject.geometry;
-//   geometry.computeBoundingBox();
-//   const box = geometry.boundingBox;
-//   const boxCenter = new THREE.Vector3();
-//   box.getCenter(boxCenter);
+
+
+// Event handler for mouse movement to implement hover functionality.
+function onMouseMove(event) {
+  // Compute normalized device coordinates (-1 to +1) for the mouse.
+  if (!pointsObject) return;
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
+  // Update the raycaster using the main camera.
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObject(pointsObject);
   
-//   // For the x-axis: place the label a little past the maximum x.
-//   const xLabel = createTextSprite("X");
-//   xLabel.position.set(box.max.x + 0.2, boxCenter.y, boxCenter.z);
-//   scene.add(xLabel);
+  if (intersects.length > 0) {
+    const intersect = intersects[0];
+    const index = intersect.instanceId;// instanceId;index
+    // Use the corresponding CSV row from selectedRows.
+    const info = selectedOriginalRows[index];
+    const indicesToShow = [...Array(6).keys(), ...selectors.flat()];
+    const textParts = [];
+    indicesToShow.forEach(i => {
+      if (i < csvHeader.length && i < info.length) {
+        textParts.push(`${csvHeader[i].trim()}: ${info[i]}`);
+      }
+    });
+
+    // let text = csvHeader.map((header, i) => header.trim() + ": " + info[i]).join(", ");
+    tooltip.innerHTML = textParts.join(", ");
+    tooltip.style.display = "block";
+    tooltip.style.left = (event.clientX + 10) + "px";
+    tooltip.style.top = (event.clientY + 10) + "px";
+  } else {
+    tooltip.style.display = "none";
+  }
+}
+
+function updatePointPositions() {
+  if (!pointsObject) return;
   
-//   // For the y-axis: place the label a little past the maximum y.
-//   const yLabel = createTextSprite("Y");
-//   yLabel.position.set(boxCenter.x, box.max.y + 0.2, boxCenter.z);
-//   scene.add(yLabel);
+  const dummy = new THREE.Object3D();
   
-//   // For the z-axis: place the label a little past the maximum z.
-//   const zLabel = createTextSprite("Z");
-//   zLabel.position.set(boxCenter.x, boxCenter.y, box.max.z + 0.2);
-//   scene.add(zLabel);
-// }
+  // Loop over each selected normalized row.
+  for (let i = 0; i < selectedNormalizedRows.length; i++) {
+    const row = selectedNormalizedRows[i];
+    const [x, y, z] = project_row(row);
+    
+    dummy.position.set(x, y, z);
+    dummy.updateMatrix();
+    pointsObject.setMatrixAt(i, dummy.matrix);
+  }
+  pointsObject.instanceMatrix.needsUpdate = true;
+}
+
 
 // Animation loop: rotates the cube and renders the scene
 function animate() {
@@ -307,19 +471,20 @@ function animate() {
     }
   }
 
-  if( pointsObject ){
-    let g = pointsObject.geometry
-    let p = g.getAttribute("position")
-    for(let i = 0; i < p.count; ++i){
-      let row = selectedRows[i]
+  updatePointPositions();
+  // if( pointsObject ){
+  //   let g = pointsObject.geometry
+  //   let p = g.getAttribute("position")
+  //   for(let i = 0; i < p.count; ++i){
+  //     let row = selectedNormalizedRows[i]
 
-      let projection = project_row(row)
+  //     let projection = project_row(row)
 
-      // update the positions
-      p.setXYZ(i,projection[0],projection[1],projection[2])
-      p.needsUpdate = true
-    }
-  }
+  //     // update the positions
+  //     p.setXYZ(i,projection[0],projection[1],projection[2])
+  //     p.needsUpdate = true
+  //   }
+  // }
 
   // Synchronize the orientation indicator's rotation with the main scene's pivot.
   controls.update();  // Update mouse controls.
@@ -337,12 +502,13 @@ function animate() {
   renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
   renderer.render(scene, camera);
   
-  // Render the orientation indicator in the lower left corner.
+
+  // Render the orientation indicator in the lower right corner.
   // First, clear the depth buffer so the overlay appears on top.
   renderer.clearDepth();
-  // Define the indicator viewport (e.g., 150x150 pixels in the lower left).
+  // Define the indicator viewport (e.g., 150x150 pixels in the lower right).
   const indicatorSize = 300;
-  renderer.setViewport(10, 10, indicatorSize, indicatorSize);
+  renderer.setViewport(window.innerWidth - indicatorSize - 10, 10, indicatorSize, indicatorSize);
   renderer.render(axisScene, axisCamera);
   
   // Restore the full viewport.
