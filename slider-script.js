@@ -7,8 +7,8 @@ class Slider{
     }
 }
 
-sliders = []
-scale = -1;
+let sliders = []
+let scale = -1;
 
 // coefficients for the respective sliders.
 const coeffs = [
@@ -54,6 +54,10 @@ box_lines = [
 ]
 next_box_line = 0
 
+function displayPercent(num){
+    return (num*100).toFixed(1).toString() + "%"
+}
+
 function scale_px(num, scale){
     return (num*scale).toString() + "px";
 }
@@ -72,12 +76,19 @@ function setGlobalScale(scale_){
     document.styleSheets[0].insertRule(".select1{ top: calc(" + y1.toString() + "px); left: calc(" + x1.toString() + "px - 4em); }");
     document.styleSheets[0].insertRule(".select2{ top: calc(" + y2.toString() + "px - 1.7rem); left: calc(" + x2.toString() + "px - 4em); }");
     document.styleSheets[0].insertRule(".select3{ top: calc(" + y3.toString() + "px); left: calc(" + x3.toString() + "px - 4em); }");
+
+    document.styleSheets[0].insertRule(".display1{ top: calc(" + (y1-100*scale).toString() + "px); left: calc(" + (x1-70).toString() + "px); }");
+    document.styleSheets[0].insertRule(".display2{ top: calc(" + (y2).toString() + "px); left: calc(" + (x2+15).toString() + "px); }");
+    document.styleSheets[0].insertRule(".display3{ top: calc(" + (y3-100*scale).toString() + "px); left: calc(" + (x3+10).toString() + "px); }");
 }
 
 function registerSlider(id_){
     const tri = document.getElementById("triangle" + id_.toString());
     const triBox = tri.getBoundingClientRect();
     const slider = tri.children[0];
+    const display1 = tri.querySelector(".display1")
+    const display2 = tri.querySelector(".display2")
+    const display3 = tri.querySelector(".display3")
 
     dropdowns = tri.getElementsByTagName("select")
     for(let i = 0; i < dropdowns.length; ++i){
@@ -213,6 +224,10 @@ function registerSlider(id_){
 
             slider.style.top = (y-50*scale).toString() + "px";
             slider.style.left  = (x-50*scale).toString() + "px";
+
+            display1.textContent = displayPercent(t1)
+            display2.textContent = displayPercent(t2)
+            display3.textContent = displayPercent(t3)
         }
     })
 }

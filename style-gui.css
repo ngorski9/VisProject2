@@ -20,7 +20,7 @@
     left: 90px;
 }
 
-.select1, .select2, .select3{
+.select1, .select2, .select3, .display1, .display2, .display3{
     position: absolute;
     margin: 0;
     padding: 0;

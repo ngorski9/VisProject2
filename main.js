@@ -118,10 +118,11 @@ function init() {
       // We'll work on copies so as not to disturb the original arrays.
       let normCopy = normalizedData.slice();
       let origCopy = originalCSVData.slice();
-      while (selectedNormalizedRows.length < 100 && normCopy.length > 0) {
-        const idx = Math.floor(Math.random() * normCopy.length);
+      let idx = 0;
+      while (selectedNormalizedRows.length < normCopy.length && normCopy.length > 0) {
         selectedNormalizedRows.push(normCopy.splice(idx, 1)[0]);
         selectedOriginalRows.push(origCopy.splice(idx, 1)[0]);
+        idx += 1
       }
 
       createPoints(selectedNormalizedRows);

@@ -1,0 +1,66 @@
+KS1295[%],0
+6082[%],1
+2024[%],2
+bat-box[%],3
+3003[%]	4032[%],4
+Al,5
+Si,6
+Cu,7
+Ni,8
+Mg,9
+Mn,10
+Fe,11
+Cr,12
+Ti,13
+Zr,14
+V,15
+Zn,16
+Vf_FCC_A1,17
+Vf_DIAMOND_A4,18
+Vf_AL15SI2M4,19
+Vf_AL6MN,20
+Vf_AL3NI2,21
+Vf_AL3NI_D011,22
+Vf_AL7CU4NI,23
+Vf_AL2CU_C16,24
+Vf_Q_ALCUMGSI,25
+Vf_AL7CU2FE,26
+Vf_MG2SI_C1,27
+Vf_AL9FE2SI2,28
+Vf_AL18FE2MG7SI10,29
+eut. frac.[%],30
+eut. T (°C),31
+T_FCC_A1,32
+T_DIAMOND_A4,33
+T_AL15SI2M4,34
+T_AL3X,35
+T_AL6MN,36
+T_AL3NI2,37
+T_AL3NI_D011,38
+T_AL7CU4NI,39
+T_AL2CU_C16,40
+T_Q_ALCUMGSI,41
+T_AL7CU2FE,42
+T_MG2SI_C1,43
+T_AL9FE2SI2,44
+T_AL18FE2MG7SI10,45
+T(liqu),46
+T(sol),47
+delta_T,48
+delta_T_FCC,49
+delta_T_Al15Si2M4,50
+delta_T_Si,51
+CSC,52
+YS(MPa),53
+hardness(Vickers),54
+CTEvol(1/K)(20.0-300.0°C),55
+Density(g/cm3),56
+Volume(m3/mol),57
+El.conductivity(S/m),58
+El. resistivity(ohm m),59
+heat capacity(J/(mol K)),60
+Therm.conductivity(W/(mK)),61
+Therm. diffusivity(m2/s),62
+Therm.resistivity(mK/W),63
+Linear thermal expansion (1/K)(20.0-300.0°C),64
+Technical thermal expansion (1/K)(20.0-300.0°C),65
