@@ -17,6 +17,9 @@
             <select class="select3">
                 <option>Melting Temp.</option>
             </select>
+            <span class="display1">d</span>
+            <span class="display2">d</span>
+            <span class="display3">d</span>
         </div>
     </div>
 
@@ -44,7 +47,7 @@
             left: 90px;
         }
 
-        .select1, .select2, .select3{
+        .select1, .select2, .select3, .display1, .display2, .display3{
             position: absolute;
             margin: 0;
             padding: 0;
@@ -52,6 +55,10 @@
     </style>
 
     <script>
+        function displayPercent(num){
+            return (num*100).toFixed(1).toString() + "%"
+        }
+
         class Slider{
             constructor(){
                 this.t1 = -1.0
@@ -82,12 +89,19 @@
             document.styleSheets[0].insertRule(".select1{ top: calc(" + y1.toString() + "px); left: calc(" + x1.toString() + "px - 4em); }");
             document.styleSheets[0].insertRule(".select2{ top: calc(" + y2.toString() + "px - 1.7rem); left: calc(" + x2.toString() + "px - 4em); }");
             document.styleSheets[0].insertRule(".select3{ top: calc(" + y3.toString() + "px); left: calc(" + x3.toString() + "px - 4em); }");
+
+            document.styleSheets[0].insertRule(".display1{ top: calc(" + (y1-100*scale).toString() + "px); left: calc(" + (x1-60).toString() + "px); }");
+            document.styleSheets[0].insertRule(".display2{ top: calc(" + (y2).toString() + "px); left: calc(" + (x2+15).toString() + "px); }");
+            document.styleSheets[0].insertRule(".display3{ top: calc(" + (y3-100*scale).toString() + "px); left: calc(" + (x3+10).toString() + "px); }");
         }
 
         function registerSlider(id_){
             const tri = document.getElementById("triangle" + id_.toString());
             const triBox = tri.getBoundingClientRect();
             const slider = tri.children[0];
+            const display1 = tri.querySelector(".display1")
+            const display2 = tri.querySelector(".display2")
+            const display3 = tri.querySelector(".display3")
 
             tri.style.width = scale_px(1016,scale);
             tri.style.height = scale_px(896,scale);
@@ -161,6 +175,10 @@
 
                     slider.style.top = (y-50*scale).toString() + "px";
                     slider.style.left  = (x-50*scale).toString() + "px";
+
+                    display1.textContent = displayPercent(t1)
+                    display2.textContent = displayPercent(t2)
+                    display3.textContent = displayPercent(t3)
 
                     // temp. Remove later:
                     document.getElementById("coords").innerHTML = "(" + t1.toFixed(2).toString() + "," + t2.toFixed(2).toString() + "," + t3.toFixed(2).toString() + ")";

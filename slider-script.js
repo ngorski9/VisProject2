@@ -7,8 +7,8 @@ class Slider{
     }
 }
 
-sliders = []
-scale = -1;
+let sliders = []
+let scale = -1;
 
 // coefficients for the respective sliders.
 const coeffs = [
@@ -29,10 +29,18 @@ var selectors_old = [
     [6,7,8]
 ]
 
+var colorMap = 0
+
 var animationCounter = 0;
-const animation_length = 70;
+const animation_length = 20;
 
 box_lines = [
+  ["KS1295[%]",0],
+  ["6082[%]",1],
+  ["2024[%]",2],
+  ["bat-box[%]",3],
+  ["3003[%]",4],
+  ["4032[%]",5],
   ["eut. frac.",31],
   ["eut. T",32],
   ["T(liqu)",47],
@@ -52,7 +60,11 @@ box_lines = [
   ["Lin. therm. expnsn.",65],
   ["Tech. therm. expnsn.",66],
 ]
-next_box_line = 0
+next_box_line = 6
+
+function displayPercent(num){
+    return (num*100).toFixed(1).toString() + "%"
+}
 
 function scale_px(num, scale){
     return (num*scale).toString() + "px";
@@ -72,12 +84,19 @@ function setGlobalScale(scale_){
     document.styleSheets[0].insertRule(".select1{ top: calc(" + y1.toString() + "px); left: calc(" + x1.toString() + "px - 4em); }");
     document.styleSheets[0].insertRule(".select2{ top: calc(" + y2.toString() + "px - 1.7rem); left: calc(" + x2.toString() + "px - 4em); }");
     document.styleSheets[0].insertRule(".select3{ top: calc(" + y3.toString() + "px); left: calc(" + x3.toString() + "px - 4em); }");
+
+    document.styleSheets[0].insertRule(".display1{ top: calc(" + (y1-100*scale).toString() + "px); left: calc(" + (x1-70).toString() + "px); }");
+    document.styleSheets[0].insertRule(".display2{ top: calc(" + (y2).toString() + "px); left: calc(" + (x2+15).toString() + "px); }");
+    document.styleSheets[0].insertRule(".display3{ top: calc(" + (y3-100*scale).toString() + "px); left: calc(" + (x3+10).toString() + "px); }");
 }
 
 function registerSlider(id_){
     const tri = document.getElementById("triangle" + id_.toString());
     const triBox = tri.getBoundingClientRect();
     const slider = tri.children[0];
+    const display1 = tri.querySelector(".display1")
+    const display2 = tri.querySelector(".display2")
+    const display3 = tri.querySelector(".display3")
 
     dropdowns = tri.getElementsByTagName("select")
     for(let i = 0; i < dropdowns.length; ++i){
@@ -213,11 +232,32 @@ function registerSlider(id_){
 
             slider.style.top = (y-50*scale).toString() + "px";
             slider.style.left  = (x-50*scale).toString() + "px";
+
+            display1.textContent = displayPercent(t1)
+            display2.textContent = displayPercent(t2)
+            display3.textContent = displayPercent(t3)
         }
     })
+}
+
+function setupColorMap(){
+    dropdown = document.getElementById("selectColor")
+    for(let j = 0; j < box_lines.length; ++j){
+        const newOption = document.createElement("option")
+        newOption.textContent = (box_lines[j])[0]
+        newOption.value = (box_lines[j])[1]
+        dropdown.appendChild(newOption)
+    }
+    colorMap = parseInt(box_lines[box_lines.length - 1][1])
+    dropdown.value = box_lines[box_lines.length - 1][1]
+
+    dropdown.addEventListener("change",function(){
+        colorMap = parseInt(dropdown.value);
+    })    
 }
 
 setGlobalScale(0.2);
 registerSlider(0);
 registerSlider(1);
 registerSlider(2);
+setupColorMap();

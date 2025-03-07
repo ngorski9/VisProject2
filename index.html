@@ -47,18 +47,24 @@
     </select>
     <select class="select3">
     </select>
+    <span class="display1">100.0%</span>
+    <span class="display2">0.0%</span>
+    <span class="display3">0.0%</span>
     </div>   
 
     <label>Y Axis</label>
     <div class="triangle" id="triangle1">
      <div class="slider"></div>
-     <select class="select1">
+      <select class="select1">
      </select>
-     <select class="select2">
+      <select class="select2">
      </select>
-     <select class="select3">
+      <select class="select3">    
      </select>
-     </div>   
+     <span class="display1">0.0%</span>
+     <span class="display2">100.0%</span>
+     <span class="display3">0.0%</span>  
+    </div>   
 
      <label>Z Axis</label>
     <div class="triangle" id="triangle2">
@@ -69,12 +75,29 @@
       </select>
       <select class="select3">
       </select>
-      </div>   
+      <span class="display1">0.0%</span>
+      <span class="display2">0.0%</span>
+      <span class="display3">100.0%</span>      
+    </div>   
+
+    <div>
+      <span>Color: <select id="selectColor"></select></span>
+    </div>
+
+    <div>
+      <img id="colorBar" src="./Palette_viridis.png">
+    </div>
+
+    <div id="lowHighBox">
+      <span id="low">Low</span>
+      <span id="high">High</span>
+    </div>
 
   </div>
 
 
   <!-- Load your custom JavaScript file as an ES module -->
+  <script src="./js-colormaps.js"></script>
   <script type="module" src="./main.js"></script>
   <link rel="stylesheet" href="./style-gui.css"></link>
   <script src="./slider-script.js"></script>

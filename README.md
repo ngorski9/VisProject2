@@ -2,8 +2,25 @@
 
 The original dataset can be downloaded from https://github.com/ngorski9/VisProject2/releases/tag/v0.1.
 
+## Prepare Data
+1. Donwload the data for the IEEE Scivis Contest 2025.
+
+2. Place the data in this folder, and rename it "initial_data.txt"
+
+3. Run convert_to_csv_file.py (Pandas must be installed)
+
+```sh
+python3 convert_to_csv_file.py
+```
+
+4. Run normalize_csv_file.py
+
+```sh
+python3 normalize_csv_file.py
+```
+
 ## Set up environment
-1. Install `nvm` 
+5. Install `nvm` 
 ```sh
 brew install nvm
 mkdir ~/.nvm
@@ -16,17 +33,17 @@ echo '[ -s "/opt/homebrew/opt/nvm/etc/bash_completion" ] && \. "/opt/homebrew/op
 ```sh
 source ~/.zshrc  # or source ~/.bashrc
 ```
-2. Install `node.js`
+6. Install `node.js`
 ```sh
 nvm install 22
 ```
-3. Create the project
+7. Create the project
 ```sh
 cd visproject2
 npm init -y
 npm install three
 ```
-4. Run the project
+8. Run the project
 ```sh
 python -m http.server
 ```

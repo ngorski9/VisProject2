@@ -20,8 +20,23 @@
     left: 90px;
 }
 
-.select1, .select2, .select3{
+.select1, .select2, .select3, .display1, .display2, .display3{
     position: absolute;
     margin: 0;
     padding: 0;
+}
+
+#colorBar{
+    margin-top: 1em;
+    width: 80%;
+    position: absolute;
+}
+
+#lowHighBox{
+    margin-top: 2.5em;
+}
+
+#high{
+    position: absolute;
+    right: 1em;
 }
