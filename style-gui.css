@@ -25,3 +25,18 @@
     margin: 0;
     padding: 0;
 }
+
+#colorBar{
+    margin-top: 1em;
+    width: 80%;
+    position: absolute;
+}
+
+#lowHighBox{
+    margin-top: 2.5em;
+}
+
+#high{
+    position: absolute;
+    right: 1em;
+}

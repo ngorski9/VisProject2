@@ -227,7 +227,7 @@ function createPoints(rows) {
   const sphereGeometry = new THREE.SphereGeometry(0.01, 8, 8);
 
   // // You can use any material; here we use a basic red material.
-  const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+  const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
   // const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   const instancedMesh = new THREE.InstancedMesh(sphereGeometry, sphereMaterial, count);
   
@@ -421,7 +421,20 @@ function onMouseMove(event) {
     const index = intersect.instanceId;// instanceId;index
     // Use the corresponding CSV row from selectedRows.
     const info = selectedOriginalRows[index];
-    const indicesToShow = [...Array(6).keys(), ...selectors.flat()];
+
+    let otherIndicesToShow = []
+    for(let i = 0; i < 3; ++i){
+      for(let j = 0; j < 3; ++j){
+        if(selectors[i][j] > 5){
+          otherIndicesToShow.push(selectors[i][j]);
+        }
+      }
+    }
+    if(colorMap > 5){
+      otherIndicesToShow.push(colorMap)
+    }
+
+    const indicesToShow = [...Array(6).keys(), ...otherIndicesToShow];
     const textParts = [];
     indicesToShow.forEach(i => {
       if (i < csvHeader.length && i < info.length) {
@@ -430,7 +443,7 @@ function onMouseMove(event) {
     });
 
     // let text = csvHeader.map((header, i) => header.trim() + ": " + info[i]).join(", ");
-    tooltip.innerHTML = textParts.join(", ");
+    tooltip.innerHTML = textParts.join("<br>");
     tooltip.style.display = "block";
     tooltip.style.left = (event.clientX + 10) + "px";
     tooltip.style.top = (event.clientY + 10) + "px";
@@ -452,8 +465,11 @@ function updatePointPositions() {
     dummy.position.set(x, y, z);
     dummy.updateMatrix();
     pointsObject.setMatrixAt(i, dummy.matrix);
+    let colors = evaluate_cmap(row[colorMap], 'viridis', false)
+    pointsObject.setColorAt(i, new THREE.Color( colors[0] / 255,colors[1]/255,colors[2]/255 ))
   }
   pointsObject.instanceMatrix.needsUpdate = true;
+  pointsObject.instanceColor.needsUpdate = true;
 }
 
 
@@ -468,24 +484,13 @@ function animate() {
         for(let j = 0; j < 3; j++){
             selectors_old[i][j] = selectors[i][j]
         }
-    }
+      }
     }
   }
 
   updatePointPositions();
-  // if( pointsObject ){
-  //   let g = pointsObject.geometry
-  //   let p = g.getAttribute("position")
-  //   for(let i = 0; i < p.count; ++i){
-  //     let row = selectedNormalizedRows[i]
 
-  //     let projection = project_row(row)
 
-  //     // update the positions
-  //     p.setXYZ(i,projection[0],projection[1],projection[2])
-  //     p.needsUpdate = true
-  //   }
-  // }
 
   // Synchronize the orientation indicator's rotation with the main scene's pivot.
   controls.update();  // Update mouse controls.

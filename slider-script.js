@@ -29,10 +29,18 @@ var selectors_old = [
     [6,7,8]
 ]
 
+var colorMap = 0
+
 var animationCounter = 0;
-const animation_length = 70;
+const animation_length = 20;
 
 box_lines = [
+  ["KS1295[%]",0],
+  ["6082[%]",1],
+  ["2024[%]",2],
+  ["bat-box[%]",3],
+  ["3003[%]",4],
+  ["4032[%]",5],
   ["eut. frac.",31],
   ["eut. T",32],
   ["T(liqu)",47],
@@ -52,7 +60,7 @@ box_lines = [
   ["Lin. therm. expnsn.",65],
   ["Tech. therm. expnsn.",66],
 ]
-next_box_line = 0
+next_box_line = 6
 
 function displayPercent(num){
     return (num*100).toFixed(1).toString() + "%"
@@ -232,7 +240,24 @@ function registerSlider(id_){
     })
 }
 
+function setupColorMap(){
+    dropdown = document.getElementById("selectColor")
+    for(let j = 0; j < box_lines.length; ++j){
+        const newOption = document.createElement("option")
+        newOption.textContent = (box_lines[j])[0]
+        newOption.value = (box_lines[j])[1]
+        dropdown.appendChild(newOption)
+    }
+    colorMap = parseInt(box_lines[box_lines.length - 1][1])
+    dropdown.value = box_lines[box_lines.length - 1][1]
+
+    dropdown.addEventListener("change",function(){
+        colorMap = parseInt(dropdown.value);
+    })    
+}
+
 setGlobalScale(0.2);
 registerSlider(0);
 registerSlider(1);
 registerSlider(2);
+setupColorMap();
